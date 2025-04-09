@@ -1,9 +1,10 @@
-# DevEx Take-Home Assignment
+# Microservices Development and Testing Environment Prototype
 
 ## Scenario:
 "Your company has a microservices architecture with 10+ services, all built around a monolithic application and DB. Engineers frequently 
 complain that onboarding takes too long, setting up local dev environments is painful, getting a DB running locally is error-prone, 
 and running tests across services is inconsistent."
+
 
 ## Problem Framing
 ### What are the main pain points?
@@ -27,10 +28,11 @@ and running tests across services is inconsistent."
   
   4. Dependence on Local Infrastructure: When tests depend on a local setup that might differ from the production environment, the tests may pass locally but fail in production due to misconfigured or non-representative environments.  
 
+
 ## Proposed Solution
-The prototype consists of two Spring Boot "microservices—Microservice A" and "Microservice B" —with the following key interactions and deployment capabilities:
+The prototype consists of two Spring Boot "Microservice A" and "Microservice B" with the following key interactions and deployment capabilities:
 * Inter-Service Communication:
-  -	Microservice A calls Microservice B through a RESTful API endpoint.
+  -	Microservice A calls Microservice B through a Restful API endpoint.
   -	Microservice B is responsible for interacting with a database.
   - They share a parent POM to ensure consistent dependency management and versioning.
 * Deployment Options Using Docker and Docker Compose:
@@ -38,6 +40,8 @@ The prototype consists of two Spring Boot "microservices—Microservice A" and "
   -	Both Services in IntelliJ: Alternatively, both services can be started directly from the IntelliJ IDEA development environment.
   -	Mixed Deployment: You can run one service in a local Docker container while the other is started from IntelliJ.
   -	Remote Deployment Flexibility: Either microservice can be deployed to a remote environment, allowing for more distributed deployment scenarios.
+
+![img.png](img.png)
 
 ### Database migration
 Java(Springboot) not give us a good way to migrate the database like NodeJS(NestJS) or .net. 
@@ -129,7 +133,8 @@ For microservice B,
  mvn clean test
 ```
 
-## What pains resolved by this prototype
+
+## Pains resolved by this prototype
 1. Onboarding Complexity
     - Rapid Setup: Developers can quickly run local instances of both microservices without manually configuring each dependency, significantly reducing the time required for onboarding.
     - Consistent Environment: With a shared parent POM and standardized dependency management, new team members face fewer surprises regarding version mismatches or configuration drift.
@@ -139,25 +144,33 @@ For microservice B,
         * Docker Deployment: By containerizing both microservices and the database, developers can start a complete environment with a single docker-compose command.
         * IDE-Based Deployment: Services can also be run directly from IntelliJ IDEA, making it flexible for debugging and rapid local changes.
         * Mixed/Remote Options: The prototype also supports mixed (one service in Docker, the other in the IDE) and remote deployment scenarios, which helps simulate production environments more accurately.
-    - Simplified Dependency Management:
-        * The approach eliminates the need for each developer to individually configure complex inter-service dependencies and database connections.
-      
-3.	Database Setup and Migration Difficulties
-	- Liquibase Integration for Database Migration: 
-    Use of Liquibase (via a db.changelog-master.xml file) automates the execution of database schema changes, data seeding, and rollbacks.
-       This ensures that local environments are set up with a consistent and minimal dataset, reducing errors related to manual database configuration.
+    
+    **This flexibility allows developers to focus on the service they are working on without needing to run the entire system locally.**
+
+3. Database Setup and Migration Difficulties
+    - Developer can choose to connect to database locally (Docker) or on a remote server(DEV or TEST env).
+    - Liquibase Integration for Database Migration: 
+      * Use of Liquibase (via a `db.changelog-master.xml` file) automates database schema changes, data seeding, and rollbacks. 
+      * This ensures that local environments are set up with a consistent, minimal dataset and reduces errors related to manual database configuration.
 
 4. Profile-Based Configurations:
    - By using different Spring profiles (via -Dspring.profiles.active), the solution can dynamically provide the correct database connection URLs and other environment-specific settings for both local and remote deployments.
 
 5. Testing Inconsistencies
-   - Unit and Integration Testing Strategy:
-     * Unit Tests: Use tools like Mockito and Spring Boot’s testing support (e.g., MockMvc, @DataJpaTest with H2) to isolate and verify individual components, ensuring that each microservice’s functionality is robust.
-     *	Integration Tests: Utilize Testcontainers to spin up a real (or containerized) database during tests, along with integration test classes (e.g., DataControllerIntegrationTest), to verify that services interact correctly and that changes in one service don’t break the entire system.
+   - Unit Tests: 
+     
+     Use tools like Mockito and Spring Boot’s testing support (e.g., MockMvc, @DataJpaTest with H2) to isolate and verify individual components, ensuring that each microservice’s functionality is robust.
+     
+   - Integration Tests: 
+     
+     Utilize Testcontainers to spin up a real (or containerized) database during tests, along with integration test classes (e.g., DataControllerIntegrationTest), to verify that services interact correctly and that changes in one service don’t break the entire system.
+   
    - Flexible Test Execution:
-     *	Developers can run tests locally for each microservice or run regression tests that verify interactions between microservices, ensuring consistency across different deployment environments.
+   
+     Developers can run tests locally for each microservice or run regression tests that verify interactions between microservices, ensuring consistency across different deployment environments.
 
-## What can be improved
+
+## Can be improved but not in prototype
 - Comprehensive Documentation and Sample Code:
   
 In addition to the minimal dataset example currently provided, offer more detailed documentation, environment configuration guidelines, and video tutorials. This will help new engineers get up to speed faster.
@@ -177,30 +190,32 @@ Implement CI/CD pipelines to automatically build, test, and deploy the applicati
 - Service Virtualization/Mocking: 
 
 Utilize tools like **WireMock** to simulate microservice interfaces. This reduces the dependency on actual services during development and testing, thereby improving efficiency.  
+**Localstack** can be used to simulate AWS services, allowing developers to test cloud interactions without needing access to the actual services.
 
 ## How to Measure Success
-1. Onboarding Efficiency
+### Onboarding Efficiency
 
    - Time to Productivity: Track how long it takes new hires to set up their local environment and make their first successful commit. Reductions in this metric indicate improved onboarding. 
    - New Hire Feedback Scores: Use surveys or one-on-one interviews to measure overall satisfaction with the onboarding process and ease of environment setup. 
    - Onboarding Documentation Usage: Monitor access and usage analytics on the onboarding documentation and video tutorials. Increased usage can correlate with more streamlined onboarding.
 
-2. Local Development and Testing Efficiency
+### Local Development and Testing Efficiency
 
    - Setup Time Reduction: Measure the average time developers spend configuring local environments before they can start coding. A significant reduction shows that containerized deployments and standardized configurations are working.
    - Error/Issue Tracking: Track the number of setup or configuration issues logged (e.g., in issue trackers or developer forums). A decline in these issues would indicate the success of the solution.
    - Test Execution Metrics: Monitor the stability of integration and unit tests. Fewer test failures caused by misconfiguration or dependency issues on local setups would be a positive sign.
    - Deployment Success Rates: Record the success rates of local, mixed, and remote deployments. If deployments (both local and via Docker/CI pipelines) consistently succeed without environment mismatches, it demonstrates improvement.
 
-3. Database Management and Migration
+### Database Management and Migration
 
    - Migration Failure Rates: Measure the number of issues or rollbacks encountered during local database migrations using Liquibase or other tools.
    - Data Consistency: Use automated tests to validate that the database state matches expectations after migrations and seeding. Consistent test results indicate a robust migration strategy.
 
-4. Overall Developer Productivity and Satisfaction
+### Overall Developer Productivity and Satisfaction
 
    - Developer Net Promoter Score (NPS): Periodically survey your team to determine overall satisfaction with the development and testing environments. An increase in the NPS score is an indicator that the pain points are being effectively addressed. 
    - Cycle Time Metrics: Track development cycle times (e.g., time from commit to deployment/test result) to determine if faster local setups and automated pipelines are improving overall productivity.
+
 
 ## How to Gather Feedback
 
